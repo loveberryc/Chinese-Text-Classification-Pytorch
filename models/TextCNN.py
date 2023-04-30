@@ -34,6 +34,8 @@ class Config(object):
             if self.embedding_pretrained is not None else 300           # 字向量维度
         self.filter_sizes = (2, 3, 4)                                   # 卷积核尺寸
         self.num_filters = 256                                          # 卷积核数量(channels数)
+        
+        self.sentence_length = 25                                       #New
 
 
 '''Convolutional Neural Networks for Sentence Classification'''

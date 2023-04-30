@@ -2,7 +2,7 @@
 import time
 import torch
 import numpy as np
-from train_eval import train, init_network
+from train_eval import train, init_network,train_S
 from importlib import import_module
 import argparse
 
@@ -47,6 +47,10 @@ if __name__ == '__main__':
     config.n_vocab = len(vocab)
     model = x.Model(config).to(config.device)
     if model_name != 'Transformer':
-        init_network(model)
+        if model_name != 'S_TextCNN'
+            init_network(model)
     print(model.parameters)
-    train(config, model, train_iter, dev_iter, test_iter)
+    if model_name == 'S_TextCNN':
+        train_S(config, model, train_iter, dev_iter, test_iter)
+    else:
+        train(config, model, train_iter, dev_iter, test_iter)

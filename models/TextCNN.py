@@ -82,23 +82,23 @@ class Model(nn.Module):
         self.fc = nn.Linear(config.num_filters * len(config.filter_sizes), config.num_classes)
 
     def forward(self, x):
-        print("-4",x.shape)
+        print("-4",np.shape(x))
         out = self.embedding(x[0])
-        print("-3",x.shape)
+        print("-3",np.shape(x))
         out = out.unsqueeze(1)
-        print("-2.5",x.shape)
+        print("-2.5",np.shape(x))
         conv_out = [conv(out) for conv in self.convs_1]
-        print("-2",conv_out.shape)
+        print("-2",np.shape(conv_out))
         conv_out = [self.middle_relu[i](conv_out[i]) for i in range(len(self.middle_relu))]
-        print("-1",conv_out.shape)
+        print("-1",np.shape(conv_out))
         pooled_out = [pool(conv_out[i]).squeeze(3) for i, pool in enumerate(self.avgpool_1)]
-        print("0",pooled_out.shape)
+        print("0",np.shape(pooled_out))
         pooled_out = [pool(pooled_out[i]).squeeze(2) for i, pool in enumerate(self.avgpool_1)]
-        print("1",pooled_out.shape)
+        print("1",np.shape(pooled_out))
         out = torch.cat(pooled_out, dim=1)
-        print("2",out.shape)
+        print("2",np.shape(out))
         out = self.dropout(out)
-        print("3",out.shape)
+        print("3",np.shape(out))
         out = self.fc(out)
         return out
     

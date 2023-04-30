@@ -122,7 +122,7 @@ class Model(nn.Module):
             nn.AvgPool2d((config.pad_size - filter_size + 1, 1)) for filter_size in config.filter_sizes
         ])
         self.lif1 = snn.Leaky(beta=config.beta, spike_grad=spike_grad, init_hidden=True, threshold=config.threshold)
-        self.fc_1 = nn.Linear(len(config.filter_sizes)*config.filter_num, config.num_classes, bias=False)
+        self.fc_1 = nn.Linear(len(config.filter_sizes)*config.num_filters, config.num_classes, bias=False)
         self.lif2 = snn.Leaky(beta=config.beta, spike_grad=spike_grad, init_hidden=True, threshold=config.threshold, output=True)
 
         for c in self.convs_1:

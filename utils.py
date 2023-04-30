@@ -119,7 +119,7 @@ def build_iterator(dataset, config):
 
 from torch.utils.data import DataLoader
 def build_dataloader(dataset,config):
-    return DataLoader(dataset, batch_size=config.batch_size, shuffle=True))
+    return DataLoader(dataset, batch_size=config.batch_size, shuffle=True)
 
 def get_time_dif(start_time):
     """获取已使用时间"""

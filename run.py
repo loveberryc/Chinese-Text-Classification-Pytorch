@@ -40,6 +40,9 @@ if __name__ == '__main__':
     train_iter = build_iterator(train_data, config)
     dev_iter = build_iterator(dev_data, config)
     test_iter = build_iterator(test_data, config)
+    train_loader =  build_dataloader(train_data, config)
+    dev_loader =  build_dataloader(train_data, config)
+    test_loader =  build_dataloader(train_data, config)
     time_dif = get_time_dif(start_time)
     print("Time usage:", time_dif)
 
@@ -51,6 +54,6 @@ if __name__ == '__main__':
             init_network(model)
     print(model.parameters)
     if model_name == 'S_TextCNN':
-        train_S(config, model, train_iter, dev_iter, test_iter)
+        train_S(config, model, train_loader, dev_loader, test_loader)
     else:
         train(config, model, train_iter, dev_iter, test_iter)

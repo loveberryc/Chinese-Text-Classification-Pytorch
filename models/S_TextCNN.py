@@ -42,10 +42,26 @@ class Config(object):
         self.positive_init_rate = 0.55
         self.threshold = 1.0
 
-        # monitor
-        self.dead_neuron_checker = "False"
+#         # monitor
+#         self.dead_neuron_checker = "False"
         
 
+INITIAL_MEAN_DICT = {
+    "conv-kaiming": {
+        0.5: 0.0,
+        0.55: 0.01,
+        0.6: 0.02,
+        0.7: 0.03,
+        0.8: 0.06
+        },
+    "linear-kaiming": {
+        0.5: 0.0,
+        0.55: 0.08,
+        0.6: 0.14,
+        0.7: 0.28,
+        0.8: 0.46
+        },
+}
 '''Convolutional Neural Networks for Sentence Classification'''
    
 # class Model(nn.Module):
@@ -79,8 +95,8 @@ class Config(object):
    
 import snntorch.surrogate as surrogate
 import snntorch as snn
-from utils.config import INITIAL_MEAN_DICT
-from utils.monitor import Monitor
+#from utils.config import INITIAL_MEAN_DICT
+#from utils.monitor import Monitor
 from fvcore.nn import FlopCountAnalysis
 
 class Model(nn.Module):
@@ -102,8 +118,7 @@ class Model(nn.Module):
         self.lif1 = snn.Leaky(beta=config.beta, spike_grad=spike_grad, init_hidden=True, threshold=config.threshold)
         self.fc_1 = nn.Linear(len(config.filter_sizes)*config.filter_num, config.num_classes, bias=False)
         self.lif2 = snn.Leaky(beta=config.beta, spike_grad=spike_grad, init_hidden=True, threshold=config.threshold, output=True)
-    
-    def initial(self):
+
         for c in self.convs_1:
             c.weight.data.add_(INITIAL_MEAN_DICT['conv-kaiming'][self.positive_init_rate])
         m = self.fc_1
@@ -124,9 +139,9 @@ class Model(nn.Module):
         hidden_1 = self.fc_1(spks_1)
         # cur2 = self.fc_2(hidden_1)
         spk2, mem2 = self.lif2(hidden_1)
-        if self.dead_neuron_checker == "True":
-            temp_spks = spks_1.sum(dim=0)
-            Monitor.add_monitor(temp_spks, 0)
+#         if self.dead_neuron_checker == "True":
+#             temp_spks = spks_1.sum(dim=0)
+#             Monitor.add_monitor(temp_spks, 0)
         return spks_1, spk2, mem2
    
 class ANN_TextCNN(nn.Module):

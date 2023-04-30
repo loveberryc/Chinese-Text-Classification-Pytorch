@@ -32,8 +32,10 @@ class Config(object):
         self.learning_rate = 1e-3                                       # 学习率
         self.embed = self.embedding_pretrained.size(1)\
             if self.embedding_pretrained is not None else 300           # 字向量维度
-        self.filter_sizes = (2, 3, 4)                                   # 卷积核尺寸
-        self.num_filters = 256                                          # 卷积核数量(channels数)
+#         self.filter_sizes = (2, 3, 4)                                   # 卷积核尺寸
+#         self.num_filters = 256                                          # 卷积核数量(channels数)
+        self.filter_sizes = (3, 4, 5)                                   # 卷积核尺寸
+        self.num_filters = 100                                          # 卷积核数量(channels数)
         
         self.surrogate = 'fast_sigmoid'
         self.beta = 1.0

@@ -98,7 +98,7 @@ class Model(nn.Module):
         out = torch.cat(pooled_out, dim=1)
         print("2",out.shape)
         out = self.dropout(out)
-        print(3",out.shape)
+        print("3",out.shape)
         out = self.fc(out)
         return out
     

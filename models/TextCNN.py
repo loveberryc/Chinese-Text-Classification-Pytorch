@@ -28,15 +28,13 @@ class Config(object):
         self.n_vocab = 0                                                # 词表大小，在运行时赋值
         self.num_epochs = 20                                            # epoch数
         self.batch_size = 128                                           # mini-batch大小
-#         self.pad_size = 32                                              # 每句话处理成的长度(短填长切)
-        self.pad_size = 300
+        self.pad_size = 32                                              # 每句话处理成的长度(短填长切)
         self.learning_rate = 1e-3                                       # 学习率
         self.embed = self.embedding_pretrained.size(1)\
             if self.embedding_pretrained is not None else 300           # 字向量维度
         self.filter_sizes = (2, 3, 4)                                   # 卷积核尺寸
         self.num_filters = 256                                          # 卷积核数量(channels数)
         
-        self.sentence_length = 25                                       #New
 
 '''Convolutional Neural Networks for Sentence Classification'''
 
@@ -78,7 +76,7 @@ class Model(nn.Module):
         self.middle_relu = nn.ModuleList(
             [nn.ReLU() for _ in config.filter_sizes])
         self.avgpool_1 = nn.ModuleList(
-            [nn.AvgPool2d((config.sentence_length - k + 1, 1)) for k in config.filter_sizes])
+            [nn.AvgPool2d((config.pad_size - k + 1, 1)) for k in config.filter_sizes])
         self.dropout = nn.Dropout(config.dropout)
         self.fc = nn.Linear(config.pad_size, config.num_classes)
 

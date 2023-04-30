@@ -115,9 +115,9 @@ class Model(nn.Module):
         conv_out = [self.relu(i) for i in conv_out]
         pooled_out = [pool(i).squeeze(3) for i, pool in zip(conv_out, self.avgpool)]
         pooled_out = [self.relu(i) for i in pooled_out]
-        out = torch.cat(pooled_out, dim=1).view(self.batch_size, -1)
+        out = torch.cat(pooled_out, dim=1)
         out = self.dropout(out)
-        out = self.fc(out)
+        out = self.fc(out.view(self.batch_size, -1))
         return out
     
 class ANN_TextCNN(nn.Module):

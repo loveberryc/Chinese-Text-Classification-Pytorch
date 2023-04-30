@@ -79,26 +79,26 @@ class Model(nn.Module):
         self.avgpool_1 = nn.ModuleList(
             [nn.AvgPool2d((config.sentence_length - k + 1, 1)) for k in config.filter_sizes])
         self.dropout = nn.Dropout(config.dropout)
-        self.fc = nn.Linear(config.num_filters * len(config.filter_sizes), config.num_classes)
+        self.fc = nn.Linear(config.pad_size, config.num_classes)
 
     def forward(self, x):
-        print("-4",np.shape(x))
+        print("-4",np.shape(x.cpu())
         out = self.embedding(x[0])
-        print("-3",np.shape(x))
+        print("-3",np.shape(x.cpu()))
         out = out.unsqueeze(1)
-        print("-2.5",np.shape(x))
+        print("-2.5",np.shape(x.cpu()))
         conv_out = [conv(out) for conv in self.convs_1]
-        print("-2",np.shape(conv_out))
+        print("-2",np.shape(conv_out.cpu()))
         conv_out = [self.middle_relu[i](conv_out[i]) for i in range(len(self.middle_relu))]
-        print("-1",np.shape(conv_out))
+        print("-1",np.shape(conv_out.cpu()))
         pooled_out = [pool(conv_out[i]).squeeze(3) for i, pool in enumerate(self.avgpool_1)]
-        print("0",np.shape(pooled_out))
+        print("0",np.shape(pooled_out.cpu()))
         pooled_out = [pool(pooled_out[i]).squeeze(2) for i, pool in enumerate(self.avgpool_1)]
-        print("1",np.shape(pooled_out))
+        print("1",np.shape(pooled_out.cpu()))
         out = torch.cat(pooled_out, dim=1)
-        print("2",np.shape(out))
+        print("2",np.shape(out.cpu()))
         out = self.dropout(out)
-        print("3",np.shape(out))
+        print("3",np.shape(out.cpu()))
         out = self.fc(out)
         return out
     

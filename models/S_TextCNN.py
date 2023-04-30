@@ -35,6 +35,16 @@ class Config(object):
         self.filter_sizes = (2, 3, 4)                                   # 卷积核尺寸
         self.num_filters = 256                                          # 卷积核数量(channels数)
         
+        self.surrogate = 'fast_sigmoid'
+        self.beta = 1.0
+        #self.filters = [3,4,5]
+        #self.filter_num = 100
+        self.positive_init_rate = 0.55
+        self.threshold = 1.0
+
+        # monitor
+        self.dead_neuron_checker = "False"
+        
 
 '''Convolutional Neural Networks for Sentence Classification'''
    

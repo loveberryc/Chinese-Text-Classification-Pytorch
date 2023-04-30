@@ -92,9 +92,9 @@ class Config(object):
 #         out = self.fc(out)
 #         return out
    
-class TextCNN(nn.Module):
+class Model(nn.Module):
     def __init__(self, config):
-        super(TextCNN, self).__init__()
+        super(Model, self).__init__()
         if config.embedding_pretrained is not None:
             self.embedding = nn.Embedding.from_pretrained(config.embedding_pretrained, freeze=False)
         else:

@@ -105,19 +105,20 @@ class Model(nn.Module):
         self.avgpool = nn.ModuleList(
             [nn.AvgPool2d(kernel_size=(config.pad_size - k + 1, 1)) for k in config.filter_sizes])
         self.dropout = nn.Dropout(config.dropout)
-        self.fc = nn.Linear(len(config.filter_sizes) * config.num_filters, config.num_classes)
+        self.fc = nn.Linear(len(config.filter_sizes) * config.num_filters, config.num_classes,bias=False)
         self.batch_size = config.batch_size
 
     def forward(self, x):
         out = self.embedding(x[0])
+        batch_size = out.shape[0]
         out = out.unsqueeze(1)
         conv_out = [conv(out) for conv in self.convs]
         conv_out = [self.relu(i) for i in conv_out]
         pooled_out = [pool(i).squeeze(3) for i, pool in zip(conv_out, self.avgpool)]
         pooled_out = [self.relu(i) for i in pooled_out]
-        out = torch.cat(pooled_out, dim=1)
+        out = torch.cat(pooled_out, dim=1).view(batch_size, -1)
         out = self.dropout(out)
-        out = self.fc(out.view(self.batch_size, -1))
+        out = self.fc(out)
         return out
     
 class ANN_TextCNN(nn.Module):

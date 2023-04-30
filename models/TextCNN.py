@@ -28,7 +28,7 @@ class Config(object):
         self.n_vocab = 0                                                # 词表大小，在运行时赋值
         self.num_epochs = 20                                            # epoch数
         self.batch_size = 128                                           # mini-batch大小
-        #self.pad_size = 32                                              # 每句话处理成的长度(短填长切)
+        self.pad_size = 32                                              # 每句话处理成的长度(短填长切)
         self.learning_rate = 1e-3                                       # 学习率
         self.embed = self.embedding_pretrained.size(1)\
             if self.embedding_pretrained is not None else 300           # 字向量维度
@@ -36,35 +36,34 @@ class Config(object):
         self.num_filters = 256                                          # 卷积核数量(channels数)
         
         self.sentence_length = 25                                       #New
-        self.pad_size = self.sentence_length - max(self.filter_sizes) + 1#New
 
 '''Convolutional Neural Networks for Sentence Classification'''
 
 
-class Model0(nn.Module):
-    def __init__(self, config):
-        super(Model0, self).__init__()
-        if config.embedding_pretrained is not None:
-            self.embedding = nn.Embedding.from_pretrained(config.embedding_pretrained, freeze=False)
-        else:
-            self.embedding = nn.Embedding(config.n_vocab, config.embed, padding_idx=config.n_vocab - 1)
-        self.convs = nn.ModuleList(
-            [nn.Conv2d(1, config.num_filters, (k, config.embed)) for k in config.filter_sizes])
-        self.dropout = nn.Dropout(config.dropout)
-        self.fc = nn.Linear(config.num_filters * len(config.filter_sizes), config.num_classes)
+# class Model(nn.Module):
+#     def __init__(self, config):
+#         super(Model, self).__init__()
+#         if config.embedding_pretrained is not None:
+#             self.embedding = nn.Embedding.from_pretrained(config.embedding_pretrained, freeze=False)
+#         else:
+#             self.embedding = nn.Embedding(config.n_vocab, config.embed, padding_idx=config.n_vocab - 1)
+#         self.convs = nn.ModuleList(
+#             [nn.Conv2d(1, config.num_filters, (k, config.embed)) for k in config.filter_sizes])
+#         self.dropout = nn.Dropout(config.dropout)
+#         self.fc = nn.Linear(config.num_filters * len(config.filter_sizes), config.num_classes)
 
-    def conv_and_pool(self, x, conv):
-        x = F.relu(conv(x)).squeeze(3)
-        x = F.max_pool1d(x, x.size(2)).squeeze(2)
-        return x
+#     def conv_and_pool(self, x, conv):
+#         x = F.relu(conv(x)).squeeze(3)
+#         x = F.max_pool1d(x, x.size(2)).squeeze(2)
+#         return x
 
-    def forward(self, x):
-        out = self.embedding(x[0])
-        out = out.unsqueeze(1)
-        out = torch.cat([self.conv_and_pool(out, conv) for conv in self.convs], 1)
-        out = self.dropout(out)
-        out = self.fc(out)
-        return out
+#     def forward(self, x):
+#         out = self.embedding(x[0])
+#         out = out.unsqueeze(1)
+#         out = torch.cat([self.conv_and_pool(out, conv) for conv in self.convs], 1)
+#         out = self.dropout(out)
+#         out = self.fc(out)
+#         return out
 
 class Model(nn.Module):
     def __init__(self, config):
@@ -83,14 +82,23 @@ class Model(nn.Module):
         self.fc = nn.Linear(config.num_filters * len(config.filter_sizes), config.num_classes)
 
     def forward(self, x):
+        print("-4",x.shape)
         out = self.embedding(x[0])
+        print("-3",x.shape)
         out = out.unsqueeze(1)
+        print("-2.5",x.shape)
         conv_out = [conv(out) for conv in self.convs_1]
+        print("-2",conv_out.shape)
         conv_out = [self.middle_relu[i](conv_out[i]) for i in range(len(self.middle_relu))]
+        print("-1",conv_out.shape)
         pooled_out = [pool(conv_out[i]).squeeze(3) for i, pool in enumerate(self.avgpool_1)]
+        print("0",pooled_out.shape)
         pooled_out = [pool(pooled_out[i]).squeeze(2) for i, pool in enumerate(self.avgpool_1)]
+        print("1",pooled_out.shape)
         out = torch.cat(pooled_out, dim=1)
+        print("2",out.shape)
         out = self.dropout(out)
+        print(3",out.shape)
         out = self.fc(out)
         return out
     

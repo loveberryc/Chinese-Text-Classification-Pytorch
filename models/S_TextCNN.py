@@ -102,10 +102,14 @@ from fvcore.nn import FlopCountAnalysis
 class Model(nn.Module):
     def __init__(self, config, spike_grad=surrogate.fast_sigmoid(slope=25)) -> None:
         super().__init__()
-        self.dead_neuron_checker = config.dead_neuron_checker
+#         self.dead_neuron_checker = config.dead_neuron_checker
         self.positive_init_rate = config.positive_init_rate
+        if config.embedding_pretrained is not None:
+            self.embedding = nn.Embedding.from_pretrained(config.embedding_pretrained, freeze=False)
+        else:
+            self.embedding = nn.Embedding(config.n_vocab, config.embed, padding_idx=config.n_vocab - 1)
         self.convs_1 = nn.ModuleList([
-            nn.Conv2d(in_channels=1, out_channels=config.filter_num, kernel_size=(filter_size, config.embed))
+            nn.Conv2d(in_channels=1, out_channels=config.num_filters, kernel_size=(filter_size, config.embed))
             for filter_size in config.filter_sizes
         ])
         self.middle_lifs = nn.ModuleList([
@@ -125,8 +129,8 @@ class Model(nn.Module):
         m.weight.data.add_(INITIAL_MEAN_DICT["linear-kaiming"][self.positive_init_rate])
 
     def forward(self, x):
-        batch_size = x.shape[0]
         out = self.embedding(x[0])
+        batch_size = out.shape[0]
         out = out.unsqueeze(dim=1)
         conv_out = [conv(out) for conv in self.convs_1]
 

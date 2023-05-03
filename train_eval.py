@@ -8,7 +8,7 @@ import time
 from utils import get_time_dif
 from tensorboardX import SummaryWriter
 try:
-    from snntorch.backprop import BPTT
+    from snntorch.backprops import BPTT
     import snntorch.functional as SF
 except:
     pass

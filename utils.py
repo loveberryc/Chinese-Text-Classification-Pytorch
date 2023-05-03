@@ -161,7 +161,7 @@ class DatasetIterater1(object):
         else:
             return self.n_batches
 def build_dataloader(dataset,config):
-    return DatasetIterater(dataset, config.batch_size)
+    return DatasetIterater1(dataset, config.batch_size)
 
 def get_time_dif(start_time):
     """获取已使用时间"""

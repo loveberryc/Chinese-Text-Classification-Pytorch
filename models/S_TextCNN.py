@@ -66,89 +66,89 @@ INITIAL_MEAN_DICT = {
 }
 '''Convolutional Neural Networks for Sentence Classification'''
    
-# class Model(nn.Module):
-#     def __init__(self, config):
-#         super(Model, self).__init__()
-#         if config.embedding_pretrained is not None:
-#             self.embedding = nn.Embedding.from_pretrained(config.embedding_pretrained, freeze=False)
-#         else:
-#             self.embedding = nn.Embedding(config.n_vocab, config.embed, padding_idx=config.n_vocab - 1)
-#         self.convs = nn.ModuleList(
-#             [nn.Conv2d(in_channels=1, out_channels=config.num_filters, kernel_size=(k, config.embed)) for k in config.filter_sizes])
-#         self.relu = nn.ReLU()
-#         self.avgpool = nn.ModuleList(
-#             [nn.AvgPool2d(kernel_size=(config.pad_size - k + 1, 1)) for k in config.filter_sizes])
-#         self.dropout = nn.Dropout(config.dropout)
-#         self.fc = nn.Linear(len(config.filter_sizes) * config.num_filters, config.num_classes,bias=False)
-#         self.batch_size = config.batch_size
-
-#     def forward(self, x):
-#         out = self.embedding(x[0])
-#         batch_size = out.shape[0]
-#         out = out.unsqueeze(1)
-#         conv_out = [conv(out) for conv in self.convs]
-#         conv_out = [self.relu(i) for i in conv_out]
-#         pooled_out = [pool(i).squeeze(3) for i, pool in zip(conv_out, self.avgpool)]
-#         pooled_out = [self.relu(i) for i in pooled_out]
-#         out = torch.cat(pooled_out, dim=1).view(batch_size, -1)
-#         out = self.dropout(out)
-#         out = self.fc(out)
-#         return out
-   
-import snntorch.surrogate as surrogate
-import snntorch as snn
-#from utils.config import INITIAL_MEAN_DICT
-#from utils.monitor import Monitor
-from fvcore.nn import FlopCountAnalysis
-
 class Model(nn.Module):
-    def __init__(self, config, spike_grad=surrogate.fast_sigmoid(slope=25)) -> None:
-        super().__init__()
-#         self.dead_neuron_checker = config.dead_neuron_checker
-        self.positive_init_rate = config.positive_init_rate
+    def __init__(self, config):
+        super(Model, self).__init__()
         if config.embedding_pretrained is not None:
             self.embedding = nn.Embedding.from_pretrained(config.embedding_pretrained, freeze=False)
         else:
             self.embedding = nn.Embedding(config.n_vocab, config.embed, padding_idx=config.n_vocab - 1)
-        self.convs_1 = nn.ModuleList([
-            nn.Conv2d(in_channels=1, out_channels=config.num_filters, kernel_size=(filter_size, config.embed))
-            for filter_size in config.filter_sizes
-        ])
-        self.middle_lifs = nn.ModuleList([
-            snn.Leaky(beta=config.beta, spike_grad=spike_grad, init_hidden=True, threshold=config.threshold)
-            for _ in config.filter_sizes
-        ])
-        self.avgpool_1 = nn.ModuleList([
-            nn.AvgPool2d((config.pad_size - filter_size + 1, 1)) for filter_size in config.filter_sizes
-        ])
-        self.lif1 = snn.Leaky(beta=config.beta, spike_grad=spike_grad, init_hidden=True, threshold=config.threshold)
-        self.fc_1 = nn.Linear(len(config.filter_sizes)*config.num_filters, config.num_classes, bias=False)
-        self.lif2 = snn.Leaky(beta=config.beta, spike_grad=spike_grad, init_hidden=True, threshold=config.threshold, output=True)
-
-        for c in self.convs_1:
-            c.weight.data.add_(INITIAL_MEAN_DICT['conv-kaiming'][self.positive_init_rate])
-        m = self.fc_1
-        m.weight.data.add_(INITIAL_MEAN_DICT["linear-kaiming"][self.positive_init_rate])
+        self.convs = nn.ModuleList(
+            [nn.Conv2d(in_channels=1, out_channels=config.num_filters, kernel_size=(k, config.embed)) for k in config.filter_sizes])
+        self.relu = nn.ReLU()
+        self.avgpool = nn.ModuleList(
+            [nn.AvgPool2d(kernel_size=(config.pad_size - k + 1, 1)) for k in config.filter_sizes])
+        self.dropout = nn.Dropout(config.dropout)
+        self.fc = nn.Linear(len(config.filter_sizes) * config.num_filters, config.num_classes,bias=False)
+        self.batch_size = config.batch_size
 
     def forward(self, x):
         out = self.embedding(x[0])
         batch_size = out.shape[0]
-        out = out.unsqueeze(dim=1)
-        conv_out = [conv(out) for conv in self.convs_1]
-
-        conv_out = [self.middle_lifs[i](conv_out[i]) for i in range(len(self.middle_lifs))]
-
-        pooled_out = [self.avgpool_1[i](conv_out[i]) for i in range(len(self.avgpool_1))]
+        out = out.unsqueeze(1)
+        conv_out = [conv(out) for conv in self.convs]
+        conv_out = [self.relu(i) for i in conv_out]
+        pooled_out = [pool(i).squeeze(3) for i, pool in zip(conv_out, self.avgpool)]
+        pooled_out = [self.relu(i) for i in pooled_out]
+        out = torch.cat(pooled_out, dim=1).view(batch_size, -1)
+        out = self.dropout(out)
+        out = self.fc(out)
+        return out
    
-        spks = [self.lif1(pooled) for pooled in pooled_out]
-        spks_1 = torch.cat(spks, dim=1).view(batch_size, -1)
-        hidden_1 = self.fc_1(spks_1)
-        # cur2 = self.fc_2(hidden_1)
-        spk2, mem2 = self.lif2(hidden_1)
-#         if self.dead_neuron_checker == "True":
-#             temp_spks = spks_1.sum(dim=0)
-#             Monitor.add_monitor(temp_spks, 0)
-        return spks_1, spk2, mem2
+# import snntorch.surrogate as surrogate
+# import snntorch as snn
+# #from utils.config import INITIAL_MEAN_DICT
+# #from utils.monitor import Monitor
+# from fvcore.nn import FlopCountAnalysis
+
+# class Model(nn.Module):
+#     def __init__(self, config, spike_grad=surrogate.fast_sigmoid(slope=25)) -> None:
+#         super().__init__()
+# #         self.dead_neuron_checker = config.dead_neuron_checker
+#         self.positive_init_rate = config.positive_init_rate
+#         if config.embedding_pretrained is not None:
+#             self.embedding = nn.Embedding.from_pretrained(config.embedding_pretrained, freeze=False)
+#         else:
+#             self.embedding = nn.Embedding(config.n_vocab, config.embed, padding_idx=config.n_vocab - 1)
+#         self.convs_1 = nn.ModuleList([
+#             nn.Conv2d(in_channels=1, out_channels=config.num_filters, kernel_size=(filter_size, config.embed))
+#             for filter_size in config.filter_sizes
+#         ])
+#         self.middle_lifs = nn.ModuleList([
+#             snn.Leaky(beta=config.beta, spike_grad=spike_grad, init_hidden=True, threshold=config.threshold)
+#             for _ in config.filter_sizes
+#         ])
+#         self.avgpool_1 = nn.ModuleList([
+#             nn.AvgPool2d((config.pad_size - filter_size + 1, 1)) for filter_size in config.filter_sizes
+#         ])
+#         self.lif1 = snn.Leaky(beta=config.beta, spike_grad=spike_grad, init_hidden=True, threshold=config.threshold)
+#         self.fc_1 = nn.Linear(len(config.filter_sizes)*config.num_filters, config.num_classes, bias=False)
+#         self.lif2 = snn.Leaky(beta=config.beta, spike_grad=spike_grad, init_hidden=True, threshold=config.threshold, output=True)
+
+#         for c in self.convs_1:
+#             c.weight.data.add_(INITIAL_MEAN_DICT['conv-kaiming'][self.positive_init_rate])
+#         m = self.fc_1
+#         m.weight.data.add_(INITIAL_MEAN_DICT["linear-kaiming"][self.positive_init_rate])
+
+#     def forward(self, x):
+#         out = self.embedding(x[0])
+#         batch_size = out.shape[0]
+#         out = out.unsqueeze(dim=1)
+#         conv_out = [conv(out) for conv in self.convs_1]
+
+#         conv_out = [self.middle_lifs[i](conv_out[i]) for i in range(len(self.middle_lifs))]
+
+#         pooled_out = [self.avgpool_1[i](conv_out[i]) for i in range(len(self.avgpool_1))]
+   
+#         spks = [self.lif1(pooled) for pooled in pooled_out]
+#         spks_1 = torch.cat(spks, dim=1).view(batch_size, -1)
+#         hidden_1 = self.fc_1(spks_1)
+#         # cur2 = self.fc_2(hidden_1)
+#         spk2, mem2 = self.lif2(hidden_1)
+# #         if self.dead_neuron_checker == "True":
+# #             temp_spks = spks_1.sum(dim=0)
+# #             Monitor.add_monitor(temp_spks, 0)
+#         return spks_1, spk2, mem2
    
 # class ANN_TextCNN(nn.Module):
 #     def __init__(self, args) -> None:

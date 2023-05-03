@@ -25,7 +25,7 @@ if __name__ == '__main__':
         from utils_fasttext import build_dataset, build_iterator, get_time_dif
         embedding = 'random'
     else:
-        from utils import build_dataset, build_iterator, get_time_dif, build_dataloader
+        from utils import build_dataset, build_iterator, get_time_dif
 
     x = import_module('models.' + model_name)
     config = x.Config(dataset, embedding)

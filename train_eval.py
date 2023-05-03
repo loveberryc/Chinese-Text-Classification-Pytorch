@@ -84,7 +84,7 @@ def train(config, model, train_iter, dev_iter, test_iter):
     test(config, model, test_iter)
   
 
-def train(config, model, train_iter, dev_iter, test_iter):
+def train_S(config, model, train_iter, dev_iter, test_iter):
     start_time = time.time()
     model.train()
     optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)

@@ -41,8 +41,8 @@ if __name__ == '__main__':
     dev_iter = build_iterator(dev_data, config)
     test_iter = build_iterator(test_data, config)
     train_loader =  build_dataloader(train_data, config)
-    dev_loader =  build_dataloader(train_data, config)
-    test_loader =  build_dataloader(train_data, config)
+    dev_loader =  build_dataloader(dev_data, config)
+    test_loader =  build_dataloader(test_data, config)
     time_dif = get_time_dif(start_time)
     print("Time usage:", time_dif)
 

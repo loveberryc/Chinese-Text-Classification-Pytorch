@@ -47,8 +47,9 @@ if __name__ == '__main__':
     config.n_vocab = len(vocab)
     model = x.Model(config).to(config.device)
     if model_name != 'Transformer':
-        if model_name != 'S_TextCNN':
-            init_network(model)
+#         if model_name != 'S_TextCNN':
+#             init_network(model)
+        init_network(model)
     print(model.parameters)
     if model_name == 'S_TextCNN':
         train_S(config, model, train_iter, dev_iter, test_iter)
